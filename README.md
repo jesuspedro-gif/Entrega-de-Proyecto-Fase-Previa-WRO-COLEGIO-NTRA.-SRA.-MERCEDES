@@ -1,16 +1,76 @@
-WRO ROBOTICS SYMPOSIUM, MAY 2026 – CIUDAD REALCOLEGIO NUESTRA SEÑORA DE LAS MERCEDES –HERENCIA
--Technical DescriptionDevelopment: 
+# WRO Robotics Symposium, May 2026 – Ciudad Real
+**Colegio Nuestra Señora de las Mercedes – Herencia**
+
+---
+
+## Technical Description
+
+### Development
 The robot's development began with a small wooden board used for prototyping. We then designed the chassis using vector drawing software to manufacture it with a laser cutter. 
-The structure consists of two levels: the lower level houses the steering system, servo motor, and batteries, while the upper level contains the electronic components.
-Components:DC motor with gearbox.L298N motor driver.Micro:bit board + Keyestudio Shield.18650 LiPo battery holder (2 in series).HuskyLens V1 AI Camera.Power switch.180º Servo motor.Lego wheels.Rack and pinion + linkage system (built with Lego parts).3D printed parts: gears, mounts, and couplings.Challenges: After resolving a chassis issue, we designed the upper deck to hold the Micro:bit, its expansion board, the power switch, and the L298N. We also integrated a mount to secure the 180º servo on the lower section. 
-During assembly, we installed the battery pack and the geared DC motor. Finally, we added the pillars to join both levels and wired all components. A hardware setback occurred when the switch broke; it was replaced with the current one. Lastly, we 3D printed a custom mount to elevate the HuskyLens AI camera above other components and connected it to the expansion board. Once the hardware was finalized, we began programming and testing on custom-made obstacle courses to debug the code.Technical DecisionsAI Camera 
-Implementation: Elevated by several centimeters to improve the field of view (horizon control).Core Hardware: Use of Micro:bit and dedicated expansion shields.
-Form Factor: Compact robot design.ResultsWe successfully built a functional basic robot. Although its movement did not meet our initial expectations, we believe that with more time and dedication, it could have performed at a high level.
-Mobility:
-180º Servo for steering (angles: ±45º).
-Geared DC motor for rear-wheel drive.Lego-based wheels and chassis components.L298N driver for DC motor power management.
-Power Supply:Two 18650 LiPo batteries.Sensors:HuskyLens AI Camera.
-Code Documentation (Excerpts)typescript/**
+
+The structure consists of two distinct levels:
+* **Lower Level:** Houses the steering system, servo motor, and batteries.
+* **Upper Level:** Contains the electronic components.
+
+### Challenges
+After resolving a chassis issue, we designed the upper deck to hold the Micro:bit, its expansion board, the power switch, and the L298N driver. We also integrated a mount to secure the 180º servo on the lower section. 
+
+During assembly, we installed the battery pack and the geared DC motor. We added pillars to join both levels and wired all components. A hardware setback occurred when the switch broke; it was replaced with the current, more durable one. Lastly, we 3D printed a custom mount to elevate the HuskyLens AI camera above other components and connected it to the expansion board. Once the hardware was finalized, we began programming and testing on custom-made obstacle courses to debug the code.
+
+---
+
+## Hardware Components
+
+| Category | Components |
+| :--- | :--- |
+| **Microcontroller** | Micro:bit board, Keyestudio Shield |
+| **Motors & Drivers** | DC motor with gearbox, L298N motor driver, 180º Servo motor |
+| **Sensors / Vision** | HuskyLens V1 AI Camera |
+| **Power Supply** | 18650 LiPo battery holder (2 in series), Power switch |
+| **Mechanics** | Lego wheels, Rack and pinion + linkage system (Lego parts) |
+| **Custom Elements** | 3D printed parts (gears, mounts, and couplings) |
+
+---
+
+## Technical Decisions & Results
+
+We successfully built a functional basic robot. Although its movement did not meet our initial expectations, we believe that with more time and dedication, it could have performed at a high level.
+
+### Design Choices
+* **AI Camera Implementation:** Elevated by several centimeters to improve the field of view and maintain horizon control.
+* **Core Hardware:** Relied on Micro:bit and dedicated expansion shields for accessible and robust processing.
+* **Form Factor:** Maintained a compact robot design to easily navigate tight courses.
+
+### Mobility & Power
+* **Steering:** Managed by a 180º Servo (operational angles: ±45º).
+* **Traction:** Geared DC motor providing rear-wheel drive.
+* **Power Management:** L298N driver dedicated to DC motor power distribution.
+
+---
+
+## Operation & Logic
+
+The objective is for the robot to autonomously avoid obstacles based on specific environmental instructions. The system was programmed with two main goals:
+1.  **Obstacle Avoidance:** Represented by object colors (IDs) 1, 2, and 3.
+2.  **Parking (Goal):** Represented by color (ID) 4 *(Note: Goal not fully achieved during final testing)*.
+
+### Startup and Mechanics
+* **Steering Logic:** The robot utilizes a "rack and pinion" steering system controlled by a servo motor on pin `P0`. A 90° angle represents the neutral position (straight wheels), while 55° and 135° trigger lateral turns.
+* **Traction Logic:** Forward and backward movement is managed via three pins (`P1`, `P2`, `P8`). `P2` and `P8` act as logic switches (0 or 1) to determine direction. `P1` sends a PWM (analog) signal to regulate speed, ranging from 0 (stopped) to 1023 (max speed).
+* **Camera Logic:** The HuskyLens is initialized via I2C communication and configured exclusively in "Color Recognition" mode.
+
+### Behavioral Scenarios
+* **Parking Mode (ID 4):** Once detected, parking takes absolute priority. The robot accelerates to maximum speed (1023) and dynamically adjusts steering to keep the target centered. If the object's Y-coordinate exceeds 200 (meaning it is directly in front/below), the robot assumes it has reached the goal, stops, and displays an "X" on the LED matrix.
+* **Wall Detection (ID 3):** The robot immediately brakes, steers away from the wall's center, reverses, and executes an "S" maneuver to safely bypass it.
+* **Small Obstacles (IDs 1 & 2):** The robot turns its wheels, reverses slightly to create space, and straightens up. Turn directions are dictated by whether the detected color is Red (1) or Green (2).
+* **Default State:** When no objects are detected, the steering remains straight (90°) and the robot moves at a moderate speed of 750, constantly scanning for new inputs.
+
+---
+
+## Code Documentation (Excerpts)
+
+```typescript
+/**
  * Continuous forward motion function.
  * Sets traction pins and applies speed.
  */
@@ -130,13 +190,11 @@ input.onButtonPressed(Button.A, function () {
         }
     }
 })
-Operation
-The objective is for the robot to autonomously avoid obstacles based on specific instructions. To achieve this, the system was programmed with two main goals:Obstacle Avoidance: Represented by colors (IDs) 1, 2, and 3.Parking (Goal): Represented by color (ID) 4 (Note: Goal not fully achieved).
-To accomplish this, the code integrates a DC motor for traction, a servo motor for steering, and a HuskyLens camera for object (color) recognition.
-Startup and MechanicsSteering: The robot utilizes a "rack and pinion" steering system controlled by a servo motor connected to pin P0. 
-A 90-degree angle represents the neutral position (straight wheels), while angles 55 and 135 are used for lateral turns.
-Traction (DC Motor on P1, P2, and P8): Forward and backward movement is managed via three pins. P2 and P8 act as logic switches (0 or 1) to determine motor direction. Pin P1 sends a PWM (analog) signal to regulate speed, ranging from 0 (stopped) to 1023 (max speed).
-Camera (HuskyLens): I2C communication is initialized, and the camera is configured in "Color Recognition" mode.Movement FunctionsWe developed auxiliary functions to streamline the logic:Forward (speed, time) / Backward (speed, time): Moves the robot for a specific duration in milliseconds.Stop: Immediately cuts power to the DC motor.
-Main LoopUpon pressing Button A, the robot enters an infinite loop:Status Check: It first checks if the course is finished; if so, it stops all motors and exits the loop.
-Analysis: If active, the HuskyLens analyzes the field of view and retrieves the ID (color) of the object detected in the center of the frame. Based on this, the robot makes one of three decisions: park, avoid an obstacle, or move forward.Logic ScenariosParking Mode (ID 4): Once detected, modoMeta is set to true, giving parking absolute priority.Acceleration: The robot moves at maximum speed (1023).Coordinates: Using X (horizontal) and Y (vertical) coordinates, the robot adjusts:X < 140: Servo turns to angle 55.X > 180: Servo turns to angle 135.140 < X < 180: Wheels straighten (90°).Proximity: In ground robotics computer vision, as an object "descends" in the frame (Y increases), it means the robot is getting closer. If Y > 200, the robot assumes it has reached the goal, sets carreraTerminada to true, stops, and displays an "X" (IconNames.No) on the LED matrix.Wall Detection (ID 3): The robot brakes, steers away from the wall's center, reverses, and performs an "S" maneuver forward to bypass it.Small Obstacles (IDs 1 & 2): The robot turns the wheels, reverses slightly to create space, and then straightens up. The code assigns specific turn directions based on whether the color is Red (1) or Green (2).Default State: When no objects are detected, the steering stays straight (90°) and the robot moves at a moderate speed of 750, constantly scanning its surroundings.
-Demonstration Video:Watch the robot operating autonomously across different sections here:https://youtube.com/shorts/AhCgXqGC2gI?feature=share
+```
+
+---
+
+## Demonstration
+
+Watch the robot operating autonomously across different sections here:  
+[**Autonomous Operation Video (YouTube Shorts)**](https://youtube.com/shorts/AhCgXqGC2gI?feature=share)
