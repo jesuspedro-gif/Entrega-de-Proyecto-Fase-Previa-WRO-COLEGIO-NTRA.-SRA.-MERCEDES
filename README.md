@@ -11,6 +11,8 @@ Mobility:
 Geared DC motor for rear-wheel drive.Lego-based wheels and chassis components.L298N driver for DC motor power management.
 Power Supply:Two 18650 LiPo batteries.Sensors:HuskyLens AI Camera.
 Code Documentation (Excerpts)typescript/**
+
+
  * Continuous forward motion function.
  * Sets traction pins and applies speed.
  */
